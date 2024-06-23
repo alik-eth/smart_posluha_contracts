@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.26;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
+import "forge-std/console.sol";
 
 contract SmartPosluhaNFT is ERC721, Ownable {
     using Strings for uint256;
@@ -45,7 +46,7 @@ contract SmartPosluhaNFT is ERC721, Ownable {
 
     constructor(
         string memory initialOfferLink
-    ) ERC721("SmartPosluha", "SPOSLUHA") Ownable(tx.origin) {
+    ) ERC721("SmartPosluha", "SPOSLUHA") Ownable(msg.sender) {
         offerLink = initialOfferLink;
     }
 
@@ -107,29 +108,42 @@ contract SmartPosluhaNFT is ERC721, Ownable {
     }
 
     function payForService(uint256 tokenId) public {
+        console.log("Starting payForService for tokenId:", tokenId);
+
         require(exists(tokenId), "Token does not exist");
+        console.log("Token exists");
+
         require(
             ownerOf(tokenId) == msg.sender,
             "Only the owner can pay for the service"
         );
+        console.log("Owner check passed");
+
         require(!serviceDetails[tokenId].isPaid, "Service already paid");
+        console.log("Service not already paid");
+
         require(
             !isOfferExpired(tokenId) || isInGracePeriod(tokenId),
             "Offer has expired"
         );
+        console.log("Offer not expired or in grace period");
 
         ServiceDetails storage details = serviceDetails[tokenId];
         ServiceType memory serviceType = serviceTypes[details.typeId];
 
         uint256 paymentAmount = getCurrentPaymentAmount(tokenId);
+        console.log("Payment amount:", paymentAmount);
+
         IERC20 paymentToken = IERC20(serviceType.paymentToken);
         require(
             paymentToken.transferFrom(msg.sender, address(this), paymentAmount),
             "Payment failed"
         );
+        console.log("Payment transfer successful");
 
         details.isPaid = true;
         emit ServicePaid(tokenId, msg.sender);
+        console.log("Service marked as paid and event emitted");
     }
 
     function isOfferExpired(uint256 tokenId) public view returns (bool) {
