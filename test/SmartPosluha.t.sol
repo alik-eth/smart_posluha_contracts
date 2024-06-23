@@ -82,15 +82,23 @@ contract SmartPosluhaNFTTest is Test {
 
         // Transfer enough ERC20 tokens to user1
         vm.prank(owner);
-        bool success = erc20.transfer(user1, 100 ether);
-        console.log("Transfer success: ", success);
-        console.log(
-            "Owner ERC20 balance after transfer: ",
-            erc20.balanceOf(owner)
-        );
+        bool success1 = erc20.transfer(user1, 100 ether);
+        console.log("Transfer to user1 success: ", success1);
         console.log(
             "User1 ERC20 balance after transfer: ",
             erc20.balanceOf(user1)
+        );
+
+        vm.prank(user2);
+        erc20.approve(address(nft), 100 ether);
+
+        // Transfer enough ERC20 tokens to user2
+        vm.prank(owner);
+        bool success2 = erc20.transfer(user2, 100 ether);
+        console.log("Transfer to user2 success: ", success2);
+        console.log(
+            "User2 ERC20 balance after transfer: ",
+            erc20.balanceOf(user2)
         );
     }
 
@@ -170,7 +178,7 @@ contract SmartPosluhaNFTTest is Test {
         nft.mintServiceNFT(user1, 0);
     }
 
-    function testFailPayForServiceNotOwner() public {
+    function testPayForServiceNotOwner() public {
         vm.prank(owner);
         nft.addServiceType(
             "Service 1",

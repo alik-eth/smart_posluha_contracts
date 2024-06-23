@@ -113,12 +113,6 @@ contract SmartPosluhaNFT is ERC721, Ownable {
         require(exists(tokenId), "Token does not exist");
         console.log("Token exists");
 
-        require(
-            ownerOf(tokenId) == msg.sender,
-            "Only the owner can pay for the service"
-        );
-        console.log("Owner check passed");
-
         require(!serviceDetails[tokenId].isPaid, "Service already paid");
         console.log("Service not already paid");
 
