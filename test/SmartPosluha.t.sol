@@ -6,6 +6,7 @@ import "forge-std/Test.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../src/SmartPosluha.sol";
 import "forge-std/console.sol";
+import "../src/Authorization.sol";
 
 contract MockERC20 is IERC20 {
     string public name = "Mock ERC20";
@@ -67,6 +68,7 @@ contract MockERC20 is IERC20 {
 contract SmartPosluhaNFTTest is Test {
     SmartPosluhaNFT public nft;
     MockERC20 public erc20;
+    Authorization public auth;
 
     address owner = address(1);
     address user1 = address(2);
@@ -74,11 +76,15 @@ contract SmartPosluhaNFTTest is Test {
 
     function setUp() public {
         erc20 = new MockERC20(1e24, owner);
-        nft = new SmartPosluhaNFT("https://example.com");
+        auth = new Authorization();
+        nft = new SmartPosluhaNFT("https://example.com", address(auth));
         nft.transferOwnership(owner);
 
         vm.deal(user1, 1 ether);
         vm.deal(user2, 1 ether);
+
+        auth.authorizeAccount(user1, true);
+        auth.authorizeAccount(user2, true);
 
         // Transfer enough ERC20 tokens to user1
         vm.prank(owner);
@@ -162,7 +168,7 @@ contract SmartPosluhaNFTTest is Test {
         );
 
         vm.prank(user1);
-        uint256 tokenId = nft.mintServiceNFT(user1, 0);
+        uint256 tokenId = nft.mintServiceNFT(0);
         assertEq(tokenId, 1);
         assertEq(nft.ownerOf(tokenId), user1);
 
@@ -175,7 +181,7 @@ contract SmartPosluhaNFTTest is Test {
 
     function testFailMintServiceNFTNonExistentType() public {
         vm.prank(user1);
-        nft.mintServiceNFT(user1, 0);
+        nft.mintServiceNFT(0);
     }
 
     function testPayForServiceNotOwner() public {
@@ -191,7 +197,7 @@ contract SmartPosluhaNFTTest is Test {
         );
 
         vm.prank(user1);
-        uint256 tokenId = nft.mintServiceNFT(user1, 0);
+        uint256 tokenId = nft.mintServiceNFT(0);
 
         vm.prank(user2);
         nft.payForService(tokenId);
@@ -210,7 +216,7 @@ contract SmartPosluhaNFTTest is Test {
         );
 
         vm.prank(user1);
-        uint256 tokenId = nft.mintServiceNFT(user1, 0);
+        uint256 tokenId = nft.mintServiceNFT(0);
 
         vm.prank(user1);
         erc20.approve(address(nft), 100 ether);
@@ -243,7 +249,7 @@ contract SmartPosluhaNFTTest is Test {
         );
 
         vm.prank(user1);
-        uint256 tokenId = nft.mintServiceNFT(user1, 0);
+        uint256 tokenId = nft.mintServiceNFT(0);
 
         vm.warp(block.timestamp + 31 days); // Move forward in time to after the service duration
 
@@ -277,7 +283,7 @@ contract SmartPosluhaNFTTest is Test {
         );
 
         vm.prank(user1);
-        uint256 tokenId = nft.mintServiceNFT(user1, 0);
+        uint256 tokenId = nft.mintServiceNFT(0);
 
         bytes32 consumptionHash = keccak256(abi.encodePacked("some data"));
         vm.prank(owner);
@@ -300,7 +306,7 @@ contract SmartPosluhaNFTTest is Test {
         );
 
         vm.prank(user1);
-        uint256 tokenId = nft.mintServiceNFT(user1, 0);
+        uint256 tokenId = nft.mintServiceNFT(0);
 
         bytes32 consumptionHash = keccak256(abi.encodePacked("some data"));
         vm.prank(user1);
@@ -320,7 +326,7 @@ contract SmartPosluhaNFTTest is Test {
         );
 
         vm.prank(user1);
-        uint256 tokenId = nft.mintServiceNFT(user1, 0);
+        uint256 tokenId = nft.mintServiceNFT(0);
 
         vm.prank(user1);
         erc20.approve(address(nft), 100 ether);
@@ -364,7 +370,7 @@ contract SmartPosluhaNFTTest is Test {
         );
 
         vm.prank(user1);
-        uint256 tokenId = nft.mintServiceNFT(user1, 0);
+        uint256 tokenId = nft.mintServiceNFT(0);
 
         // Log tokenId
         console.log("Minted tokenId: ", tokenId);
@@ -407,7 +413,7 @@ contract SmartPosluhaNFTTest is Test {
         );
 
         vm.prank(user1);
-        uint256 tokenId = nft.mintServiceNFT(user1, 0);
+        uint256 tokenId = nft.mintServiceNFT(0);
 
         vm.warp(block.timestamp + 30 days + 1 days); // Move forward in time to within the grace period
 
@@ -442,7 +448,7 @@ contract SmartPosluhaNFTTest is Test {
         );
 
         vm.prank(user1);
-        uint256 tokenId = nft.mintServiceNFT(user1, 0);
+        uint256 tokenId = nft.mintServiceNFT(0);
 
         vm.prank(user1);
         erc20.approve(address(nft), 100 ether);

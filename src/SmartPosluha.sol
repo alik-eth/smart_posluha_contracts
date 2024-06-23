@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import "forge-std/console.sol";
+import "./Authorization.sol";
 
 contract SmartPosluhaNFT is ERC721, Ownable {
     using Strings for uint256;
@@ -37,6 +38,7 @@ contract SmartPosluhaNFT is ERC721, Ownable {
     uint256 public nextServiceTypeId;
     string public offerLink;
     string private _baseTokenURI;
+    Authorization private auth;
 
     event ServiceTypeAdded(uint256 typeId);
     event ServiceTypeRemoved(uint256 typeId);
@@ -45,9 +47,11 @@ contract SmartPosluhaNFT is ERC721, Ownable {
     event ServicePaid(uint256 tokenId, address payer);
 
     constructor(
-        string memory initialOfferLink
+        string memory initialOfferLink,
+        address authAddress
     ) ERC721("SmartPosluha", "SPOSLUHA") Ownable(msg.sender) {
         offerLink = initialOfferLink;
+        auth = Authorization(authAddress);
     }
 
     function addServiceType(
@@ -88,15 +92,13 @@ contract SmartPosluhaNFT is ERC721, Ownable {
         _baseTokenURI = baseTokenURI;
     }
 
-    function mintServiceNFT(
-        address recipient,
-        uint256 typeId
-    ) public returns (uint256) {
+    function mintServiceNFT(uint256 typeId) public returns (uint256) {
         require(serviceTypes[typeId].exists, "Service type does not exist");
+        require(auth.isAuthorized(msg.sender), "User must be authorized");
 
         _tokenIds++;
         uint256 newItemId = _tokenIds;
-        _mint(recipient, newItemId);
+        _mint(msg.sender, newItemId);
 
         serviceDetails[newItemId] = ServiceDetails({
             typeId: typeId,

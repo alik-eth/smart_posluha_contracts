@@ -9,9 +9,13 @@ contract DeploySmartPosluhaNFT is Script {
         string memory initialOfferLink = "https://fex.net/s/4dsbt8a";
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address auth = 0xAF966e9F18aEF846Bd5AF2ce2627Fa4d92e244dd;
 
         vm.startBroadcast(deployerPrivateKey);
-        SmartPosluhaNFT nftContract = new SmartPosluhaNFT(initialOfferLink);
+        SmartPosluhaNFT nftContract = new SmartPosluhaNFT(
+            initialOfferLink,
+            auth
+        );
         vm.stopBroadcast();
     }
 }
