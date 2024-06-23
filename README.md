@@ -90,7 +90,7 @@ To use this contract, deploy it to an Ethereum network, and then interact with i
 
 ```solidity
 // Deploy the contract
-SmartPosluhaNFT smartPosluha = new SmartPosluhaNFT("https://initial.offer.link");
+SmartPosluhaNFT smartPosluha = new SmartPosluhaNFT("https://offer.link");
 
 // Add a new service type
 smartPosluha.addServiceType(
